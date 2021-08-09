@@ -71,6 +71,12 @@ Route.group(() => {
 
 Route.group(() => {
     
+    Route.get('/profile', async ({ auth, request, response }) => {
+        return {
+          user: auth.user
+        }
+    })
+
     Route.get('/logout', async ({ auth, response }) => {
         await auth.use('api').revoke()
         return {
