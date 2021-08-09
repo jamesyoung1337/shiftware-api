@@ -94,5 +94,5 @@ Route.group(() => {
         }
     })
 })
-.middleware('auth:api')
+.middleware('api')
 .prefix('/api/v1')
