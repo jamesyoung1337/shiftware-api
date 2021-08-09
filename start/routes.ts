@@ -23,6 +23,7 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import User from '../app/Models/User'
 import Client from '../app/Models/Client'
 import * as dotenv from 'dotenv'
+import Profile from 'App/Models/Profile'
 
 Route.group(() => {
 
@@ -78,8 +79,11 @@ Route.group(() => {
     })
 
     Route.post('/profile', async ({ auth, request, response }) => {
-        const user = auth.user
-
+        const user = auth.user!
+        const profile = await Profile.findBy('userId', user.id)
+        return {
+            profile: profile
+        }
     })
 
     Route.get('/logout', async ({ auth, response }) => {
