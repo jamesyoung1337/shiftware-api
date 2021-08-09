@@ -40,27 +40,10 @@ Route.group(() => {
         
         const email = request.input('email')
         const password = request.input('password')
-
-        // const loginSchema = ({
-        //     email: schema.string({}, [
-        //         rules.email()
-        //     ]),
-        //     password: schema.string({}, [
-        //         rules.confirmed()
-        //     ])
-        // })
-
-        // try {
-        //     const payload = await request.validate({
-        //       schema: loginSchema
-        //     })
-        // }
-        // catch (error) {
-        //     response.badRequest(error.messages)
-        // }
     
         try {
-          const token = await auth.use('api').attempt(email, password, { expiresIn: '24hours', name: 'MobileToken' })
+          const token = await auth.use('api').attempt(email, password,
+            { expiresIn: '24hours', name: 'MobileToken' })
           return token
         }
         catch {
@@ -73,8 +56,10 @@ Route.group(() => {
 Route.group(() => {
     
     Route.get('/profile', async ({ auth, request, response }) => {
+        const user = auth.user!
+        const profile = await Profile.findBy('userId', user.id)
         return {
-          user: auth.user
+            profile: profile
         }
     })
 
@@ -84,6 +69,26 @@ Route.group(() => {
             {business: request.input('business'), abn: request.input('abn')})
         return {
             profile: profile
+        }
+    })
+
+    Route.get('/clients', async ({ auth, request, response }) => {
+        const user = auth.user!
+        const clients = await user.related('clients').query()
+        return {
+            clients: clients
+        }
+    })
+
+    Route.post('/clients', async ({ auth, request, response }) => {
+        const user = auth.user!
+        const client = new Client()
+        client.name = request.input('name')
+        client.email = request.input('email')
+        await client.related('user').associate(user)
+        await client.save()
+        return {
+            client: client
         }
     })
 
