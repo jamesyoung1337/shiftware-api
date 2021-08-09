@@ -23,5 +23,10 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.group(() => {
     
 })
+.prefix('/api/v1')
+
+Route.group(() => {
+    
+})
 .middleware('auth:auth,api')
 .prefix('/api/v1')
