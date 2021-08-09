@@ -19,6 +19,9 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import User from 'app/Models/User'
+import Client from 'app/Models/Client'
 
 Route.group(() => {
     
