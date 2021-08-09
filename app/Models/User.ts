@@ -5,9 +5,12 @@ import {
   beforeSave,
   BaseModel,
   hasMany,
-  HasMany
+  HasMany,
+  hasOne,
+  HasOne
 } from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
+import Profile from './Profile'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -30,6 +33,9 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @hasOne(() => Profile)
+  public profile: HasOne<typeof Profile>
 
   @hasMany(() => Client)
   public clients: HasMany<typeof Client>
