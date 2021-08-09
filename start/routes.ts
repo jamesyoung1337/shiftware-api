@@ -80,7 +80,8 @@ Route.group(() => {
 
     Route.post('/profile', async ({ auth, request, response }) => {
         const user = auth.user!
-        const profile = await Profile.findBy('userId', user.id)
+        const profile = await Profile.firstOrCreate({ userId: user.id }, 
+            {business: request.input('business'), abn: request.input('abn')})
         return {
             profile: profile
         }
