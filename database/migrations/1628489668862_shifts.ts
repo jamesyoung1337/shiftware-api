@@ -1,18 +1,20 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
-export default class Clients extends BaseSchema {
-  protected tableName = 'clients'
+export default class Shifts extends BaseSchema {
+  protected tableName = 'shifts'
 
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
+      table.string('description', 255)
+      table.datetime('shift_start')
+      table.datetime('shift_end')
+      table.decimal('rate')
       table
-        .integer('user_id')
+        .integer('client_id')
         .unsigned()
-        .references('users.id')
-        .onDelete('CASCADE') // delete client when user is deleted
-      table.string('email', 255).nullable()
-      table.string('name', 255).nullable()
+        .references('clients.id')
+        .onDelete('CASCADE')  // delete shift when client is deleted?
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
