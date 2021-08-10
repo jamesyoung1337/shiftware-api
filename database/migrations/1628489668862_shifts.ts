@@ -15,6 +15,11 @@ export default class Shifts extends BaseSchema {
         .unsigned()
         .references('clients.id')
         .onDelete('CASCADE')  // delete shift when client is deleted?
+        table
+        .integer('invoice_id')
+        .unsigned()
+        .references('invoices.id')
+        .onDelete('CASCADE')  // delete invoice when client is deleted?
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

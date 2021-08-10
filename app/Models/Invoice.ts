@@ -16,6 +16,9 @@ export default class Invoice extends BaseModel {
   @hasMany(() => Shift)
   public shifts: HasMany<typeof Shift>
 
+  @column()
+  public clientId: number
+
   @belongsTo(() => Client)
   public client: BelongsTo<typeof Client>
 

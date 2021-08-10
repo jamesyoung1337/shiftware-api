@@ -7,10 +7,14 @@ import {
   hasMany,
   HasMany,
   hasOne,
-  HasOne
+  HasOne,
+  hasManyThrough,
+  HasManyThrough
 } from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
 import Profile from './Profile'
+import Shift from './Shift'
+import Invoice from './Invoice'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -39,6 +43,18 @@ export default class User extends BaseModel {
 
   @hasMany(() => Client)
   public clients: HasMany<typeof Client>
+
+  @hasManyThrough([
+    () => Shift,
+    () => Client,
+  ])
+  public shifts: HasManyThrough<typeof Shift>
+
+  @hasManyThrough([
+    () => Invoice,
+    () => Client,
+  ])
+  public invoices: HasManyThrough<typeof Invoice>
 
   @beforeSave()
   public static async hashPassword (user: User) {

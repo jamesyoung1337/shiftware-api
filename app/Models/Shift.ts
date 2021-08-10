@@ -19,11 +19,17 @@ export default class Shift extends BaseModel {
   @column()
   public rate: number
 
+  @column()
+  public clientId: number
+
+  @column()
+  public invoiceId: number
+
   @belongsTo(() => Client)
   public client: BelongsTo<typeof Client>
 
-  @hasOne(() => Invoice)
-  public invoice: HasOne<typeof Invoice>
+  @belongsTo(() => Invoice)
+  public invoice: BelongsTo<typeof Invoice>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
