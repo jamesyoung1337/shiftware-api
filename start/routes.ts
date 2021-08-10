@@ -167,9 +167,12 @@ Route.group(() => {
     Route.put('/invoices/:id', async ({ auth, request, params, response }) => {
         const user = auth.user!
         const invoice = await Invoice.find(params.id)
-        invoice.paid = request.input('paid')
-        await invoice.save()
-        return response.created()
+        if (invoice !== null) {
+            invoice.paid = request.input('paid')
+            await invoice.save()
+            return response.created()
+        }
+        return response.badRequest({ message: 'Could not locate invoice' })
     })
 
     Route.post('/invoices', async ({ auth, request, response }) => {
