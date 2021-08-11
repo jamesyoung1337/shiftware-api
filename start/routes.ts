@@ -32,6 +32,29 @@ import Invoice from 'App/Models/Invoice'
 import moment from 'moment'
 import * as dotenv from 'dotenv'
 
+import crypto from 'crypto'
+
+type ResetToken = {
+    id: number,
+    current_timestamp: number,
+    password_hash: string,
+    last_login_timestamp: number
+}
+
+const generatePasswordResetToken = (token: ResetToken) => {
+    
+    let _token = token.id.toString()
+    
+    _token += ';'
+    _token += token.current_timestamp.toString()
+    _token += ';'
+    _token += token.password_hash
+    _token += ';'
+    _token += token.last_login_timestamp.toString()
+
+    return crypto.createHash('sha256').update(_token).digest('hex')
+}
+
 Route.group(() => {
 
     Route.post('/register', async ({ request, response }) => {
@@ -74,6 +97,28 @@ Route.group(() => {
           return response.unauthorized()
         }
     })
+
+    // Tokens are generated like this, hashed with sha256:
+    // Token: 1;1628654231527;$argon2id$v=19$t=3,m=4096,p=1$8pnlBkKDw+3SSv6gBVHvYg$Q/4UbOSo2M/vnXwO2iHPcTTU0wYXqZBbAQvDUhkuv5E;1628654227927
+    // Hash: 3372920852f90405c9b2a28dd541c9a7137c4fd7114460a0241930eeb584b918
+    Route.get('/reset-password', async({ auth, request, response }) => {
+        // not logged in presumably, but can be: optional
+        const qs = request.qs()
+        if (Object.keys(qs).length !== 1 || !Object.keys(qs).includes('email')) {
+            return response.badRequest({ message: 'Bad request for password reset'})
+        }
+        const user = await User.findBy('email', qs['email'])
+        if (user === null) {
+            return response.badRequest({ message: 'Bad request for password reset'})
+        }
+        const last_login = user.lastLoginAt?.toSeconds() ?? moment().unix()
+        const reset_token: ResetToken = { id: user.id, current_timestamp: new Date().getSeconds(),
+            password_hash: user.password, last_login_timestamp: last_login }
+        const token = generatePasswordResetToken(reset_token)
+        user.passwordResetToken = token
+        await user.save()
+        return response.noContent()
+    })
 })
 .prefix('/api/v1')
 
@@ -98,6 +143,18 @@ Route.group(() => {
         return {
             profile: profile
         }
+    })
+
+    Route.get('/reset-password/:id/:token', async({ auth, request, params, response }) => {
+        // already logged in
+        const user = auth.user!
+        const last_login = user.lastLoginAt?.toSeconds() ?? moment().unix()
+        const reset_token: ResetToken = { id: user.id, current_timestamp: new Date().getSeconds(),
+            password_hash: user.password, last_login_timestamp: last_login }
+        const token = generatePasswordResetToken(reset_token)
+        user.resetPasswordToken = token
+        await user.save()
+        return response.noContent()
     })
 
     Route.get('/clients', async ({ auth, request, response }) => {

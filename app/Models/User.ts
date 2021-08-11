@@ -33,7 +33,7 @@ export default class User extends BaseModel {
   public rememberMeToken?: string
 
   @column()
-  public resetPasswordToken?: string
+  public passwordResetToken?: string
 
   @column()
   public lastLoginAt?: DateTime
