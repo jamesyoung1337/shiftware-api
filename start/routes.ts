@@ -20,6 +20,7 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 import Event from '@ioc:Adonis/Core/Event'
+import { DateTime } from 'luxon'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 import User from '../app/Models/User'
@@ -57,6 +58,15 @@ Route.group(() => {
           const token = await auth.use('api').attempt(email, password,
             { expiresIn: '24hours', name: 'MobileToken' })
           
+            const user = await User.findBy('email', email)
+
+            // Note: Shouldn't happen, already attempted auth above and have
+            // logged in user by email and password
+            if (user !== null) {
+                user.lastLoginAt = DateTime.now().setZone('Australia/Sydney')
+                await user.save()
+            }
+
             Event.emit('user:login', auth.user!)
             return token
         }

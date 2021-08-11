@@ -12,6 +12,21 @@ export default class Profile extends BaseModel {
   @column()
   public abn: string
 
+  @column()
+  public address: string
+
+  @column()
+  public suburb: string
+
+  @column()
+  public state: string
+
+  @column()
+  public postcode: string
+
+  @column()
+  public country: string
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
