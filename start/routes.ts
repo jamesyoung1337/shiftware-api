@@ -162,14 +162,14 @@ Route.group(() => {
         }
     }).where('client', /^[0-9]+$/)
 
-    Route.get('/shifts/:day', async ({ auth, request, params, response }) => {
+    Route.get('/shifts/:date', async ({ auth, request, params, response }) => {
         const user = auth.user!
         const shifts = await user.related('shifts').query().orderBy('shift_start')
         if (shifts === null || shifts.length == 0) {
             return response.notFound()
         }
         let filtered_shifts: Shift[] = []
-        let day = moment(params.day)
+        let day = moment(params.date)
         for (let shift of shifts) {
             const regexp = /(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d)/
             let start_date = moment(shift.shift_start).toISOString(false)
@@ -182,21 +182,21 @@ Route.group(() => {
                 filtered_shifts.push(shift)
         }
         if (filtered_shifts.length == 0) {
-            return response.notFound({ message: `Could not locate shift for ${params.day}` })
+            return response.notFound({ message: `Could not locate shift for ${params.date}` })
         }
         return {
             shifts: filtered_shifts
         }
-    }).where('day', /^\d\d\d\d-\d\d-\d\d$/)
+    }).where('date', /^\d\d\d\d-\d\d-\d\d$/)
 
-    Route.get('/shifts/:day/:client', async ({ auth, request, params, response }) => {
+    Route.get('/shifts/:date/:client', async ({ auth, request, params, response }) => {
         const user = auth.user!
         const shifts = await user.related('shifts').query().where('clientId', params.client).orderBy('shift_start')
         if (shifts === null || shifts.length == 0) {
             return response.notFound()
         }
         let filtered_shifts: Shift[] = []
-        let day = moment(params.day)
+        let day = moment(params.date)
         for (let shift of shifts) {
             const regexp = /(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d)/
             let start_date = moment(shift.shift_start).toISOString(false)
@@ -204,17 +204,17 @@ Route.group(() => {
             console.log(matches)
             let start = matches[1] + ' ' + matches[2]
             let shift_day = moment(start)
-            // console.log(`Shift start date: ${shift_day}`)
-            if (day.isSame(shift_day, 'day'))
+            // console.log(`Shift start date: ${shift_date}`)
+            if (day.isSame(shift_day, 'date'))
                 filtered_shifts.push(shift)
         }
         if (filtered_shifts.length == 0) {
-            return response.notFound({ message: `Could not locate shift for ${params.day}` })
+            return response.notFound({ message: `Could not locate shift for ${params.date}` })
         }
         return {
             shifts: filtered_shifts
         }
-    }).where('day', /^\d\d\d\d-\d\d-\d\d$/).where('client', /^[0-9]+$/)
+    }).where('date', /^\d\d\d\d-\d\d-\d\d$/).where('client', /^[0-9]+$/)
 
     Route.post('/shifts', async ({ auth, request, response }) => {
         const user = auth.user!
