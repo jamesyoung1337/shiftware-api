@@ -31,9 +31,11 @@ import Shift from 'App/Models/Shift'
 import Invoice from 'App/Models/Invoice'
 
 import moment from 'moment'
+import { DateTime } from 'luxon'
 import * as dotenv from 'dotenv'
 
 import crypto from 'crypto'
+
 const node2fa = require("node-2fa")
 
 type ResetToken = {
@@ -88,12 +90,31 @@ Route.group(() => {
         
         const email = request.input('email')
         const password = request.input('password')
+        const google2fa_token = request.input('token') ?? null
     
         try {
           const token = await auth.use('api').attempt(email, password,
             { expiresIn: '24hours', name: 'MobileToken' })
           
             const user = await User.findBy('email', email)
+
+            if (user?.enable_2fa && google2fa_token !== null) {
+                // const newToken = twofactor.generateToken("XDQXYCP5AC6FA32FQXDGJSPBIDYNKK5W");
+                // => { token: '630618' }
+                // twofactor.verifyToken("XDQXYCP5AC6FA32FQXDGJSPBIDYNKK5W", "630618");
+                // => { delta: 0 }
+                const newToken = node2fa.generateToken(user.google2fa_secret)
+                console.log(`New 2fa token: `)
+                console.log(newToken)
+                let result = node2fa.verifyToken(user.google2fa_secret, google2fa_token)
+                console.log(`Verify result: `)
+                console.log(result)
+                if (result === null) {
+                    // Token wrong?
+                    await auth.use('api').revoke()
+                    return response.unauthorized({ message: 'Incorrect 2fa token: please check your authenticator app' })
+                }
+            }
 
             // Note: Shouldn't happen, already attempted auth above and have
             // logged in user by email and password
@@ -155,6 +176,15 @@ Route.group(() => {
 
 Route.group(() => {
     
+    Route.get('/enable-2fa', async({ auth, request, response }) => {
+        const user = auth.user!
+        user.enable_2fa = true
+        const secret = node2fa.generateSecret({ name: "Shiftware", account: user.email })
+        user.google2fa_secret = secret.secret
+        await user.save()
+        return { secret: secret }
+    })
+
     Route.get('/profile', async ({ auth, request, response }) => {
         const user = auth.user!
         const profile = await Profile.findBy('userId', user.id)

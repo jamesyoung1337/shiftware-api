@@ -36,10 +36,10 @@ export default class User extends BaseModel {
   public passwordResetToken?: string
 
   @column()
-  public google2faSecret?: string
+  public google2fa_secret?: string
 
   @column()
-  public enable2fa: boolean
+  public enable_2fa: boolean
 
   @column()
   public lastLoginAt?: DateTime
