@@ -124,15 +124,17 @@ Route.group(() => {
             password_hash: user.password, last_login_timestamp: last_login }
         console.log(reset_token)
         const token = generatePasswordResetToken(reset_token)
-        user.passwordResetToken = token + ';' + moment().unix().toString()
-        await user.save()
+        user.passwordResetToken = token
         await Mail.send((message) => {
             message
               .from('noreply@shiftware.digital')
               .to(user.email)
               .subject('Shiftware password reset')
-              .htmlView('emails/reset_password', user)
+              .htmlView('emails/reset_password', { user })
           })
+        user.passwordResetToken += ';' + moment().unix().toString()
+        await user.save()
+        
         return { token: token }
     })
 
