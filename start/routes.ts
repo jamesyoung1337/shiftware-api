@@ -34,6 +34,7 @@ import moment from 'moment'
 import * as dotenv from 'dotenv'
 
 import crypto from 'crypto'
+const node2fa = require("node-2fa")
 
 type ResetToken = {
     id: number,
@@ -138,13 +139,14 @@ Route.group(() => {
         return { token: token }
     })
 
-    Route.get('/reset-password/:token', async({ auth, request, params, response }) => {
+    Route.post('/reset-password/:token', async({ auth, request, params, response }) => {
         // not logged in presumably, but can be: optional
         // With token;timestamp this LIKE query seems to work well
         const users = await User.query().where('passwordResetToken', 'LIKE', params.token)
         if (users === null || users.length !== 1) {
             return response.badRequest({ message: 'Bad request for password reset'})
         }
+
         return { user: users[0] }
     }).where('token', /^[a-z0-9]{64}$/)
 

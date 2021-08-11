@@ -36,6 +36,12 @@ export default class User extends BaseModel {
   public passwordResetToken?: string
 
   @column()
+  public google2faSecret?: string
+
+  @column()
+  public enable2fa: boolean
+
+  @column()
   public lastLoginAt?: DateTime
 
   @column.dateTime({ autoCreate: true })
