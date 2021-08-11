@@ -90,7 +90,11 @@ Route.group(() => {
     Route.post('/profile', async ({ auth, request, response }) => {
         const user = auth.user!
         const profile = await Profile.firstOrCreate({ userId: user.id }, 
-            {business: request.input('business'), abn: request.input('abn')})
+            {business: request.input('business') ?? null, abn: request.input('abn') ?? null,
+            address: request.input('address') ?? null, suburb: request.input('suburb') ?? null,
+            state: request.input('state') ?? null, postcode: request.input('postcode') ?? null,
+            country: request.input('country') ?? null
+        })
         return {
             profile: profile
         }
