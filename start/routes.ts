@@ -173,22 +173,21 @@ Route.group(() => {
 Route.group(() => {
     
     Route.get('/enable-2fa', async({ auth, request, response }) => {
+        
         const user = auth.user!
-        let secret
+        
         if (!user.enable_2fa) {
             user.enable_2fa = true
-            secret = node2fa.generateSecret({ name: "Shiftware", account: user.email })
+            const secret = node2fa.generateSecret({ name: "Shiftware", account: user.email })
             user.google2fa_secret = secret.secret
             await user.save()
+            return { secret: secret }
         }
-        else {
-            secret.secret = user.google2fa_secret
-            // TODO
-            // secret.uri = 
+        
+        // 2fa already enabled
+        return {
+            message: '2fa already enabled'
         }
-        // Find a way to generate secret when it's already enabled, i.e. generate url
-        // and send it back along with secret 'key'
-        return { secret: secret }
     })
 
     Route.get('/profile', async ({ auth, request, response }) => {
