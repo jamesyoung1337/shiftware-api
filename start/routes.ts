@@ -20,7 +20,8 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 import Event from '@ioc:Adonis/Core/Event'
-import { DateTime } from 'luxon'
+import Mail from '@ioc:Adonis/Addons/Mail'
+
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 import User from '../app/Models/User'
@@ -43,14 +44,17 @@ type ResetToken = {
 
 const generatePasswordResetToken = (token: ResetToken) => {
     
-    let _token = token.id.toString()
+    // None of this really matters much
+    let _token = crypto.randomBytes(16)
+
+    // let _token = token.id.toString()
     
-    _token += ';'
-    _token += token.current_timestamp.toString()
-    _token += ';'
-    _token += token.password_hash
-    _token += ';'
-    _token += token.last_login_timestamp.toString()
+    // _token += ';'
+    // _token += token.current_timestamp.toString()
+    // _token += ';'
+    // _token += token.password_hash
+    // _token += ';'
+    // _token += token.last_login_timestamp.toString()
 
     return crypto.createHash('sha256').update(_token).digest('hex')
 }
@@ -69,6 +73,13 @@ Route.group(() => {
             return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
         }
         Event.emit('user:register', user)
+        await Mail.send((message) => {
+            message
+              .from('noreply@shiftware.digital')
+              .to(user.email)
+              .subject('Welcome Onboard!')
+              .htmlView('emails/welcome', { name: user.name })
+          })
         return response.created()
     })
 
@@ -98,9 +109,6 @@ Route.group(() => {
         }
     })
 
-    // Tokens are generated like this, hashed with sha256:
-    // Token: 1;1628654231527;$argon2id$v=19$t=3,m=4096,p=1$8pnlBkKDw+3SSv6gBVHvYg$Q/4UbOSo2M/vnXwO2iHPcTTU0wYXqZBbAQvDUhkuv5E;1628654227927
-    // Hash: 3372920852f90405c9b2a28dd541c9a7137c4fd7114460a0241930eeb584b918
     Route.get('/reset-password', async({ auth, request, response }) => {
         // not logged in presumably, but can be: optional
         const qs = request.qs()
@@ -116,22 +124,28 @@ Route.group(() => {
             password_hash: user.password, last_login_timestamp: last_login }
         console.log(reset_token)
         const token = generatePasswordResetToken(reset_token)
-        user.passwordResetToken = token
+        user.passwordResetToken = token + ';' + moment().unix().toString()
         await user.save()
+        await Mail.send((message) => {
+            message
+              .from('noreply@shiftware.digital')
+              .to(user.email)
+              .subject('Shiftware password reset')
+              .htmlView('emails/reset_password', user)
+          })
         return { token: token }
     })
 
-    // Tokens are generated like this, hashed with sha256:
-    // Token: 1;1628654231527;$argon2id$v=19$t=3,m=4096,p=1$8pnlBkKDw+3SSv6gBVHvYg$Q/4UbOSo2M/vnXwO2iHPcTTU0wYXqZBbAQvDUhkuv5E;1628654227927
-    // Hash: 3372920852f90405c9b2a28dd541c9a7137c4fd7114460a0241930eeb584b918
     Route.get('/reset-password/:token', async({ auth, request, params, response }) => {
         // not logged in presumably, but can be: optional
-        const user = await User.findBy('passwordResetToken', params.token)
-        if (user === null) {
+        // With token;timestamp this LIKE query seems to work well
+        const users = await User.query().where('passwordResetToken', 'LIKE', params.token)
+        if (users === null || users.length !== 1) {
             return response.badRequest({ message: 'Bad request for password reset'})
         }
-        return { user: user }
+        return { user: users[0] }
     }).where('token', /^[a-z0-9]{64}$/)
+
 })
 .prefix('/api/v1')
 

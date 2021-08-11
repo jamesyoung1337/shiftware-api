@@ -23,6 +23,7 @@
     "@adonisjs/mail": "^7.2.3",
     "@adonisjs/redis": "^7.0.8",
     "@adonisjs/repl": "^3.0.0",
+    "@adonisjs/view": "^6.0.8",
     "@types/luxon": "^2.0.0",
     "dotenv": "^10.0.0",
     "luxon": "^2.0.2",

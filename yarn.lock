@@ -287,6 +287,15 @@
     tmp-cache "^1.1.0"
     validator "^13.6.0"
 
+"@adonisjs/view@^6.0.8":
+  version "6.0.8"
+  resolved "https://registry.yarnpkg.com/@adonisjs/view/-/view-6.0.8.tgz#22cc403975d1dc8d617e13796ec9c1bb134e8ac2"
+  integrity sha512-HJSPGeYgeuYKJ9dv+bVTF9jkphRZtaDE5bJXFuNdPCnJc6GS58OBugoS/DBlGpYoPe+uImPdHlEvWaETnttSuQ==
+  dependencies:
+    edge-error "^2.0.5"
+    edge-supercharged "^3.1.1"
+    edge.js "^5.3.1"
+
 "@arr/every@^1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@arr/every/-/every-1.0.1.tgz#22fe1f8e6355beca6c7c7bde965eb15cf994387b"
@@ -384,6 +393,11 @@
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/@poppinss/hooks/-/hooks-3.0.5.tgz#ae491fc11500bc9cb7e24f6b637704e7d9868505"
   integrity sha512-kazQstmIPq4n7/qjk5ms9SEiXtLEJ+EMZXxyXTupTVq7URFIUeULgXFv/F3vheLPCSzfByu/L2iO7M457RjszQ==
+
+"@poppinss/inspect@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@poppinss/inspect/-/inspect-1.0.1.tgz#b03df9c1204ee72e3b9dbd5c34029c39475fb21d"
+  integrity sha512-kLeEaBSGhlleyYvKc7c9s3uE6xv7cwyulE0EgHf4jU/CL96h0yC4mkdw1wvC1l1PYYQozCGy46FwMBAAMOobCA==
 
 "@poppinss/manager@^4.0.4":
   version "4.0.4"
@@ -615,7 +629,7 @@ acorn-walk@^8.0.2:
   resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-8.1.1.tgz#3ddab7f84e4a7e2313f6c414c5b7dac85f4e3ebc"
   integrity sha512-FbJdceMlPHEAWJOILDk1fXD8lnTlEIWFkqtfk+MvmL5q/qlHfN7GEHcsFZWt/Tea9jRNPWUZG4G976nqAAmU9w==
 
-acorn@^8.0.5:
+acorn@^8.0.5, acorn@^8.4.1:
   version "8.4.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.4.1.tgz#56c36251fc7cabc7096adc18f05afe814321a28c"
   integrity sha512-asabaBSkEKosYKMITunzX177CXxQ4Q8BSSzMTKD+FefUhipQC70gfW5SiUDhYQ3vk8G+81HqQk7Fv9OXwwn9KA==
@@ -778,6 +792,11 @@ astral-regex@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-2.0.0.tgz#483143c567aeed4785759c0865786dc77d7d2e31"
   integrity sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==
+
+astring@^1.7.5:
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/astring/-/astring-1.7.5.tgz#a7d47fceaf32b052d33a3d07c511efeec67447ca"
+  integrity sha512-lobf6RWXb8c4uZ7Mdq0U12efYmpD1UFnyOWVJPTa3ukqZrMopav+2hdNu0hgBF0JIBFK9QgrBDfwYvh3DFJDAA==
 
 atob@^2.1.2:
   version "2.1.2"
@@ -1392,6 +1411,51 @@ dotenv@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
+
+edge-error@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/edge-error/-/edge-error-2.0.5.tgz#b439103d32a9f55da08891e85beec38036cc9142"
+  integrity sha512-1eJm10bEIS6u9N3dR5W0Eecnv4YVtUHralpJp0NdrVLo7H7DXx/s2DIjWoG/HsNkD2mymNVL37eZ+BgvBO5adQ==
+
+edge-lexer@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/edge-lexer/-/edge-lexer-4.0.7.tgz#ff89deed437b4e9a565206229d86029769c835a4"
+  integrity sha512-GtmxqiusZ8mySw8FstBMz2jSt5tOW8OYUf2HMmtHQXJG/R/EgZC1DAU/5m1VUyqSNjpisGyPRls+Qn/MScmZ6g==
+  dependencies:
+    edge-error "^2.0.5"
+
+edge-parser@^8.0.10:
+  version "8.0.10"
+  resolved "https://registry.yarnpkg.com/edge-parser/-/edge-parser-8.0.10.tgz#bc70fb2f90980ebde5e13559af8ba1f16e327b68"
+  integrity sha512-Othm9HRmf1uunaJO7I6g1g2EcGvEFvPsIHDosphLL2JydzP6H51QAr34KXDde7aJb+ZlXLHTti8+q+dGM7wFDQ==
+  dependencies:
+    acorn "^8.4.1"
+    astring "^1.7.5"
+    edge-error "^2.0.5"
+    edge-lexer "^4.0.7"
+    js-stringify "^1.0.2"
+
+edge-supercharged@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/edge-supercharged/-/edge-supercharged-3.1.1.tgz#dcf68c38cf26d11db4bceab44e06729daec1d39d"
+  integrity sha512-Pxgst3UeR+0PWuTIG2QHuFgFe73TMoVMphRsa/bOmIvOkQ87cD7+VxiS9ph2KbA4djJ2ChbdgtbNiIvju5yXEw==
+  dependencies:
+    "@poppinss/utils" "^3.1.3"
+    slash "^3.0.0"
+
+edge.js@^5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/edge.js/-/edge.js-5.3.1.tgz#d31ccca55c67b2f1a7af0a57286ae7054627a29e"
+  integrity sha512-TWiPo7Unaww1fYll/zMANVma08q2WoG8j7g9iK3fed5AevD0XuBl8N2L9+vCE7TKJmTm/zNP5z8bKbfGWOTRbw==
+  dependencies:
+    "@poppinss/inspect" "^1.0.1"
+    "@poppinss/utils" "^3.1.4"
+    edge-error "^2.0.5"
+    edge-lexer "^4.0.7"
+    edge-parser "^8.0.10"
+    js-stringify "^1.0.2"
+    macroable "^5.1.4"
+    stringify-attributes "^2.0.0"
 
 editorconfig@^0.15.3:
   version "0.15.3"
@@ -2252,6 +2316,11 @@ joycon@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/joycon/-/joycon-3.0.1.tgz#9074c9b08ccf37a6726ff74a18485f85efcaddaf"
   integrity sha512-SJcJNBg32dGgxhPtM0wQqxqV0ax9k/9TaUskGDSJkSFSQOEWWvQ3zzWdGQRIUry2j1zA5+ReH13t0Mf3StuVZA==
+
+js-stringify@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/js-stringify/-/js-stringify-1.0.2.tgz#1736fddfd9724f28a3682adc6230ae7e4e9679db"
+  integrity sha1-Fzb939lyTyijaCrcYjCufk6Weds=
 
 js-tokens@^3.0.2:
   version "3.0.2"
