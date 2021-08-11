@@ -111,14 +111,27 @@ Route.group(() => {
         if (user === null) {
             return response.badRequest({ message: 'Bad request for password reset'})
         }
-        const last_login = user.lastLoginAt?.toSeconds() ?? moment().unix()
-        const reset_token: ResetToken = { id: user.id, current_timestamp: new Date().getSeconds(),
+        const last_login = user.lastLoginAt?.toJSDate().getUTCSeconds() ?? moment().unix()
+        const reset_token: ResetToken = { id: user.id, current_timestamp: last_login,
             password_hash: user.password, last_login_timestamp: last_login }
+        console.log(reset_token)
         const token = generatePasswordResetToken(reset_token)
         user.passwordResetToken = token
         await user.save()
-        return response.noContent()
+        return { token: token }
     })
+
+    // Tokens are generated like this, hashed with sha256:
+    // Token: 1;1628654231527;$argon2id$v=19$t=3,m=4096,p=1$8pnlBkKDw+3SSv6gBVHvYg$Q/4UbOSo2M/vnXwO2iHPcTTU0wYXqZBbAQvDUhkuv5E;1628654227927
+    // Hash: 3372920852f90405c9b2a28dd541c9a7137c4fd7114460a0241930eeb584b918
+    Route.get('/reset-password/:token', async({ auth, request, params, response }) => {
+        // not logged in presumably, but can be: optional
+        const user = await User.findBy('passwordResetToken', params.token)
+        if (user === null) {
+            return response.badRequest({ message: 'Bad request for password reset'})
+        }
+        return { user: user }
+    }).where('token', /^[a-z0-9]{64}$/)
 })
 .prefix('/api/v1')
 
@@ -143,18 +156,6 @@ Route.group(() => {
         return {
             profile: profile
         }
-    })
-
-    Route.get('/reset-password/:id/:token', async({ auth, request, params, response }) => {
-        // already logged in
-        const user = auth.user!
-        const last_login = user.lastLoginAt?.toSeconds() ?? moment().unix()
-        const reset_token: ResetToken = { id: user.id, current_timestamp: new Date().getSeconds(),
-            password_hash: user.password, last_login_timestamp: last_login }
-        const token = generatePasswordResetToken(reset_token)
-        user.resetPasswordToken = token
-        await user.save()
-        return response.noContent()
     })
 
     Route.get('/clients', async ({ auth, request, response }) => {

@@ -20,6 +20,7 @@
     "@adonisjs/auth": "^8.0.7",
     "@adonisjs/core": "^5.1.0",
     "@adonisjs/lucid": "^15.0.3",
+    "@adonisjs/mail": "^7.2.3",
     "@adonisjs/redis": "^7.0.8",
     "@adonisjs/repl": "^3.0.0",
     "@types/luxon": "^2.0.0",

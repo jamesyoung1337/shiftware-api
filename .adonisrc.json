@@ -4,7 +4,8 @@
     "./commands",
     "@adonisjs/core/commands",
     "@adonisjs/repl/build/commands",
-    "@adonisjs/lucid/build/commands"
+    "@adonisjs/lucid/build/commands",
+    "@adonisjs/mail/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
@@ -28,7 +29,8 @@
     "@adonisjs/core",
     "@adonisjs/lucid",
     "@adonisjs/auth",
-    "@adonisjs/redis"
+    "@adonisjs/redis",
+    "@adonisjs/mail"
   ],
   "aceProviders": [
     "@adonisjs/repl"
