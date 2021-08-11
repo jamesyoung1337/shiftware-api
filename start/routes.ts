@@ -19,6 +19,7 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import Event from '@ioc:Adonis/Core/Event'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 
 import User from '../app/Models/User'
@@ -37,7 +38,13 @@ Route.group(() => {
         user.name = request.input('name')
         user.email = request.input('email')
         user.password = request.input('password')
-        await user.save()
+        try {
+            await user.save()
+        }
+        catch (e) {
+            return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
+        }
+        Event.emit('user:register', user)
         return response.created()
     })
 
@@ -49,7 +56,9 @@ Route.group(() => {
         try {
           const token = await auth.use('api').attempt(email, password,
             { expiresIn: '24hours', name: 'MobileToken' })
-          return token
+          
+            Event.emit('user:login', auth.user!)
+            return token
         }
         catch {
           return response.unauthorized()
@@ -85,6 +94,14 @@ Route.group(() => {
         }
     })
 
+    Route.get('/clients/:id', async ({ auth, request, params, response }) => {
+        const user = auth.user!
+        const clients = await user.related('clients').query().where('id', params.id)
+        return {
+            client: clients[0]
+        }
+    }).where('id', /^[0-9]+$/)
+
     Route.post('/clients', async ({ auth, request, response }) => {
         const user = auth.user!
         const client = new Client()
@@ -104,6 +121,100 @@ Route.group(() => {
             shifts: shifts
         }
     })
+
+    Route.get('/shifts/search', async ({ auth, request, response }) => {
+        const user = auth.user!
+        let shifts
+        if (request.qs()) {
+            let query = request.qs()
+            if (Object.keys(query).length === 0) {
+                return response.notFound({ message: 'No search parameters provided' })
+            }
+            for (let q of Object.keys(query)) {
+                if (q === 'description') {
+                    shifts = await user.related('shifts').query().where('description', 'LIKE', query[q])
+                    break
+                }
+                if (q === 'client') {
+                    shifts = await user.related('shifts').query().preload('client').where('name', 'LIKE', query[q]).orWhere('email', 'LIKE', '%' + query[q] + '%')
+                    break
+                }
+                // escape/safe reflect q if necessary
+                return response.badRequest({ message: `Invalid search parameter ${q}` })
+            }
+        }
+        else {
+            return response.notFound({ message: 'No search parameters provided' })
+        }
+        return {
+            shifts: shifts
+        }
+    })
+
+    Route.get('/shifts/:client', async ({ auth, request, params, response }) => {
+        const user = auth.user!
+        const shifts = await user.related('shifts').query().where('clientId', params.client)
+        if (shifts.length === 0) {
+            return response.notFound()
+        }
+        return {
+            shifts: shifts
+        }
+    }).where('client', /^[0-9]+$/)
+
+    Route.get('/shifts/:day', async ({ auth, request, params, response }) => {
+        const user = auth.user!
+        const shifts = await user.related('shifts').query().orderBy('shift_start')
+        if (shifts === null || shifts.length == 0) {
+            return response.notFound()
+        }
+        let filtered_shifts: Shift[] = []
+        let day = moment(params.day)
+        for (let shift of shifts) {
+            const regexp = /(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d)/
+            let start_date = moment(shift.shift_start).toISOString(false)
+            let matches = start_date.toString().match(regexp) ?? []
+            console.log(matches)
+            let start = matches[1] + ' ' + matches[2]
+            let shift_day = moment(start)
+            // console.log(`Shift start date: ${shift_day}`)
+            if (day.isSame(shift_day, 'day'))
+                filtered_shifts.push(shift)
+        }
+        if (filtered_shifts.length == 0) {
+            return response.notFound({ message: `Could not locate shift for ${params.day}` })
+        }
+        return {
+            shifts: filtered_shifts
+        }
+    }).where('day', /^\d\d\d\d-\d\d-\d\d$/)
+
+    Route.get('/shifts/:day/:client', async ({ auth, request, params, response }) => {
+        const user = auth.user!
+        const shifts = await user.related('shifts').query().where('clientId', params.client).orderBy('shift_start')
+        if (shifts === null || shifts.length == 0) {
+            return response.notFound()
+        }
+        let filtered_shifts: Shift[] = []
+        let day = moment(params.day)
+        for (let shift of shifts) {
+            const regexp = /(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d)/
+            let start_date = moment(shift.shift_start).toISOString(false)
+            let matches = start_date.toString().match(regexp) ?? []
+            console.log(matches)
+            let start = matches[1] + ' ' + matches[2]
+            let shift_day = moment(start)
+            // console.log(`Shift start date: ${shift_day}`)
+            if (day.isSame(shift_day, 'day'))
+                filtered_shifts.push(shift)
+        }
+        if (filtered_shifts.length == 0) {
+            return response.notFound({ message: `Could not locate shift for ${params.day}` })
+        }
+        return {
+            shifts: filtered_shifts
+        }
+    }).where('day', /^\d\d\d\d-\d\d-\d\d$/).where('client', /^[0-9]+$/)
 
     Route.post('/shifts', async ({ auth, request, response }) => {
         const user = auth.user!
@@ -131,6 +242,9 @@ Route.group(() => {
     Route.get('/invoices/:id', async ({ auth, request, params, response }) => {
         const user = auth.user!
         const invoices = await Invoice.query().where('id', params.id).preload('shifts')
+        if (invoices === null || invoices.length == 0) {
+            return response.badRequest({ message: `Could not locate invoice #${params.id}` })
+        }
         let subtotal = 0.0
         let gst = 0.0
         let total = 0.0
@@ -162,7 +276,7 @@ Route.group(() => {
             gst: formatter.format(gst),
             total: formatter.format(total)
         }
-    })
+    }).where('id', /^[0-9]+$/)
 
     Route.put('/invoices/:id', async ({ auth, request, params, response }) => {
         const user = auth.user!
@@ -173,7 +287,7 @@ Route.group(() => {
             return response.created()
         }
         return response.badRequest({ message: 'Could not locate invoice' })
-    })
+    }).where('id', /^[0-9]+$/)
 
     Route.post('/invoices', async ({ auth, request, response }) => {
         const user = auth.user!

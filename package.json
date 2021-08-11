@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node ace build --production",
     "start": "node server.js",
+    "start-with-logs": "node server.js >> app.log",
     "dev": "node ace serve --watch"
   },
   "devDependencies": {
