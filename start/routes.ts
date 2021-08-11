@@ -104,11 +104,7 @@ Route.group(() => {
                 // twofactor.verifyToken("XDQXYCP5AC6FA32FQXDGJSPBIDYNKK5W", "630618");
                 // => { delta: 0 }
                 const newToken = node2fa.generateToken(user.google2fa_secret)
-                console.log(`New 2fa token: `)
-                console.log(newToken)
                 let result = node2fa.verifyToken(user.google2fa_secret, google2fa_token)
-                console.log(`Verify result: `)
-                console.log(result)
                 if (result === null) {
                     // Token wrong?
                     await auth.use('api').revoke()
@@ -178,10 +174,20 @@ Route.group(() => {
     
     Route.get('/enable-2fa', async({ auth, request, response }) => {
         const user = auth.user!
-        user.enable_2fa = true
-        const secret = node2fa.generateSecret({ name: "Shiftware", account: user.email })
-        user.google2fa_secret = secret.secret
-        await user.save()
+        let secret
+        if (!user.enable_2fa) {
+            user.enable_2fa = true
+            secret = node2fa.generateSecret({ name: "Shiftware", account: user.email })
+            user.google2fa_secret = secret.secret
+            await user.save()
+        }
+        else {
+            secret.secret = user.google2fa_secret
+            // TODO
+            // secret.uri = 
+        }
+        // Find a way to generate secret when it's already enabled, i.e. generate url
+        // and send it back along with secret 'key'
         return { secret: secret }
     })
 
