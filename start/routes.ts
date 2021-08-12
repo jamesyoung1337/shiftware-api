@@ -69,6 +69,15 @@ Route.group(() => {
         user.name = request.input('name')
         user.email = request.input('email')
         user.password = request.input('password')
+        
+        await Mail.send((message) => {
+            message
+              .from('noreply@shiftware.digital')
+              .to(user.email)
+              .subject('Welcome Onboard!')
+              .htmlView('emails/welcome', { name: user.name })
+        })
+        
         try {
             await user.save()
         }
@@ -76,13 +85,7 @@ Route.group(() => {
             return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
         }
         Event.emit('user:register', user)
-        await Mail.send((message) => {
-            message
-              .from('noreply@shiftware.digital')
-              .to(user.email)
-              .subject('Welcome Onboard!')
-              .htmlView('emails/welcome', { name: user.name })
-          })
+        
         return response.created()
     })
 
