@@ -84,7 +84,7 @@ Route.group(() => {
         catch (e) {
             return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
         }
-        
+
         Event.emit('user:register', user)
         
         return response.created()
@@ -141,12 +141,18 @@ Route.group(() => {
         if (user === null) {
             return response.badRequest({ message: 'Bad request for password reset'})
         }
-        const last_login = user.lastLoginAt?.toJSDate().getUTCSeconds() ?? moment().unix()
+        let last_login = moment().unix()
+        if (user.lastLoginAt) {
+            // if lastLoginAt is set
+            last_login = moment(user.lastLoginAt).unix()
+        }
         const reset_token: ResetToken = { id: user.id, current_timestamp: last_login,
             password_hash: user.password, last_login_timestamp: last_login }
         console.log(reset_token)
         const token = generatePasswordResetToken(reset_token)
         user.passwordResetToken = token
+        // password token has ;timestamp appended after sending mail,
+        // which uses the token in its url
         await Mail.send((message) => {
             message
               .from('noreply@shiftware.digital')
