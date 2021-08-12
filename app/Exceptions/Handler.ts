@@ -28,10 +28,10 @@ export default class ExceptionHandler extends HttpExceptionHandler {
      * Self handle the validation exception
      */
 
-    Logger.debug(error.code)
+    // Logger.debug(error.code)
       
     if (error.code === 'E_ROUTE_NOT_FOUND') {
-      return ctx.response.status(401).json({ message: `The server cannot find ${ctx.request.url(false)}` })
+      return ctx.response.status(404).json({ message: `The server cannot find ${ctx.request.url(false)}` })
     }
 
     if (error.code >= 500) {
