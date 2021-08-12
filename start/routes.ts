@@ -70,20 +70,21 @@ Route.group(() => {
         user.email = request.input('email')
         user.password = request.input('password')
         
-        await Mail.send((message) => {
-            message
-              .from('noreply@shiftware.digital')
-              .to(user.email)
-              .subject('Welcome Onboard!')
-              .htmlView('emails/welcome', { name: user.name })
-        })
-        
         try {
             await user.save()
+
+            await Mail.send((message) => {
+                message
+                  .from('noreply@shiftware.digital')
+                  .to(user.email)
+                  .subject('Welcome Onboard!')
+                  .htmlView('emails/welcome', { user })
+            })
         }
         catch (e) {
             return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
         }
+        
         Event.emit('user:register', user)
         
         return response.created()
