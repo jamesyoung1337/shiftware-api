@@ -28,5 +28,8 @@ Start the Redis service:
 
 This will need to be done every time you want to run the dev environment.
 
+### Run migrations for database
+`node ace migrations:run`
+
 ### Run in dev mode
 `yarn dev`
