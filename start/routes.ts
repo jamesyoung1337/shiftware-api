@@ -205,6 +205,8 @@ Route.group(() => {
 
         // If we get here, reset password is good to go ahead
         user.password = password
+        // Remove this password reset token
+        user.passwordResetToken = undefined
         await user.save()
 
         await Mail.send((message) => {
