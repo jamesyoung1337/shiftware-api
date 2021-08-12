@@ -168,13 +168,56 @@ Route.group(() => {
 
     Route.post('/reset-password/:token', async({ auth, request, params, response }) => {
         // not logged in presumably, but can be: optional
+        
         // With token;timestamp this LIKE query seems to work well
         const users = await User.query().where('passwordResetToken', 'LIKE', params.token)
         if (users === null || users.length !== 1) {
             return response.badRequest({ message: 'Bad request for password reset'})
         }
 
-        return { user: users[0] }
+        // Ensure we have just one record returned
+        // Shouldn't happen!
+        if (users.length > 1) {
+            return response.internalServerError({
+                message:
+                'The server experienced an internal error trying to reset your password. Please contact support'
+            })
+        }
+
+        let user = users[0]
+        
+        // Either just { "password": "..." }
+        // Or { "password": "...", token: "123456" } for those with 2fa enabled
+        const password = request.input('password')
+        const google2fa_token = request.input('token') ?? null
+
+        if (user.enable_2fa && google2fa_token !== null) {
+            // const newToken = twofactor.generateToken("XDQXYCP5AC6FA32FQXDGJSPBIDYNKK5W");
+            // => { token: '630618' }
+            // twofactor.verifyToken("XDQXYCP5AC6FA32FQXDGJSPBIDYNKK5W", "630618");
+            // => { delta: 0 }
+            const newToken = node2fa.generateToken(user.google2fa_secret)
+            let result = node2fa.verifyToken(user.google2fa_secret, google2fa_token)
+            if (result === null) {
+                return response.unauthorized({ message: 'Incorrect 2fa token: please check your authenticator app' })
+            }
+        }
+
+        // If we get here, reset password is good to go ahead
+        user.password = password
+        await user.save()
+
+        await Mail.send((message) => {
+            message
+              .from('noreply@shiftware.digital')
+              .to(user.email)
+              .subject('Shiftware password has been reset')
+              .htmlView('emails/reset_password_done', { user })
+          })
+
+        return {
+            message: 'Password reset successfully'
+        }
     }).where('token', /^[a-z0-9]{64}$/)
 
 })
