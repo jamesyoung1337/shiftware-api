@@ -245,6 +245,23 @@ Route.group(() => {
         }
     })
 
+    Route.get('/disable-2fa', async({ auth, request, response }) => {
+        
+        const user = auth.user!
+        
+        if (user.enable_2fa) {
+            user.enable_2fa = false
+            user.google2fa_secret = undefined
+            await user.save()
+            return { message: '2fa disabled' }
+        }
+        
+        // 2fa already enabled
+        return {
+            message: '2fa already disabled'
+        }
+    })
+
     Route.get('/profile', async ({ auth, request, response }) => {
         const user = auth.user!
         const profile = await Profile.findBy('userId', user.id)
