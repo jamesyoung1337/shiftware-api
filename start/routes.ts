@@ -329,11 +329,11 @@ Route.group(() => {
             }
             for (let q of Object.keys(query)) {
                 if (q === 'description') {
-                    shifts = await user.related('shifts').query().where('description', 'LIKE', query[q])
+                    shifts = await user.related('shifts').query().where('description', 'LIKE', query[q] + '%')
                     break
                 }
                 if (q === 'client') {
-                    shifts = await user.related('shifts').query().preload('client').where('name', 'LIKE', query[q]).orWhere('email', 'LIKE', '%' + query[q] + '%')
+                    shifts = await user.related('shifts').query().preload('client').where('name', 'LIKE', query[q] + '%').orWhere('email', 'LIKE', query[q] + '%')
                     break
                 }
                 // escape/safe reflect q if necessary
