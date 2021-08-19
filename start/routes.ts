@@ -72,7 +72,12 @@ Route.group(() => {
         
         try {
             await user.save()
+        }
+        catch (e) {
+            return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
+        }
 
+        try {
             await Mail.send((message) => {
                 message
                   .from('noreply@shiftware.digital')
@@ -82,7 +87,8 @@ Route.group(() => {
             })
         }
         catch (e) {
-            return response.badRequest({ message: `User with email ${request.input('email')} already exists` })
+            Event.emit('user:register', user)
+            return response.created({ message: `User ${user.email} created, but unable to send registration email` })
         }
 
         Event.emit('user:register', user)
