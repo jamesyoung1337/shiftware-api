@@ -289,6 +289,28 @@ Route.group(() => {
         }
     })
 
+    Route.put('/profile', async ({ auth, request, response }) => {
+        const user = auth.user!
+        const profile = await Profile.findBy('userId', user.id)
+        // const profile = await Profile.firstOrCreate({ userId: user.id }, 
+        //     {business: request.input('business') ?? null, abn: request.input('abn') ?? null,
+        //     address: request.input('address') ?? null, suburb: request.input('suburb') ?? null,
+        //     state: request.input('state') ?? null, postcode: request.input('postcode') ?? null,
+        //     country: request.input('country') ?? null
+        // })
+        profile.business = request.input('business') ?? profile.business
+        profile.abn = request.input('abn') ?? profile.abn
+        profile.address = request.input('address') ?? profile.address
+        profile.suburb = request.input('suburb') ?? profile.suburb
+        profile.state = request.input('state') ?? profile.state
+        profile.postcode = request.input('postcode') ?? profile.postcode
+        profile.country = request.input('country') ?? profile.country
+        await profile.save()
+        return {
+            profile: profile
+        }
+    })
+
     Route.get('/clients', async ({ auth, request, response }) => {
         const user = auth.user!
         const clients = await user.related('clients').query()
@@ -302,6 +324,18 @@ Route.group(() => {
         const clients = await user.related('clients').query().where('id', params.id)
         return {
             client: clients[0]
+        }
+    }).where('id', /^[0-9]+$/)
+
+    Route.put('/clients/:id', async ({ auth, request, params, response }) => {
+        const user = auth.user!
+        const clients = await user.related('clients').query().where('id', params.id)
+        const c = clients[0]
+        c.name = request.input('name') ?? c.name
+        c.email = request.input('email') ?? c.email
+        await c.save()
+        return {
+            client: c
         }
     }).where('id', /^[0-9]+$/)
 
@@ -434,9 +468,23 @@ Route.group(() => {
         }
     })
 
+    Route.put('/shifts/:id', async ({ auth, request, params, response }) => {
+        const user = auth.user!
+        const shifts = await user.related('shifts').query().where('id', params.id)
+        let shift = shifts[0]
+        shift.description = request.input('description') ?? shift.description
+        shift.shift_start = request.input('start') ?? shift.shift_start
+        shift.shift_end = request.input('end') ?? shift.shift_end
+        shift.rate = request.input('rate') ?? shift.rate
+        await shift.save()
+        return {
+            shift: shift
+        }
+    }).where('id', /^[0-9]+$/)
+
     Route.get('/invoices', async ({ auth, request, response }) => {
         const user = auth.user!
-        const invoices = await user.related('invoices').query().preload('shifts')
+        const invoices = await user.related('invoices').query().preload('shifts').preload('client')
         return {
             invoices: invoices
         }
